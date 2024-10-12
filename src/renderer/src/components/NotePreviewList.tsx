@@ -1,5 +1,6 @@
 import { NotePreview } from '@/components'
 import { useNotesList } from '@/hooks/useNotesList'
+import { isEmpty } from 'lodash'
 import { ComponentProps } from 'react'
 import { LuFileSignature } from 'react-icons/lu'
 import { twMerge } from 'tailwind-merge'
@@ -10,11 +11,13 @@ export type NotePreviewListProps = ComponentProps<'ul'> & {
 
 export const NotePreviewList = ({ onSelect, className, ...props }: ComponentProps<'ul'>) => {
   const { notes, selectedNoteIndex, handleNoteSelect } = useNotesList({
-    onSelect: () => {},
+    onSelect: () => {}
   })
 
+  if (!notes) return null
+
   // if (notesMock.length === 0) {
-  if (notes.length === 0) {
+  if (isEmpty(notes)) {
     return (
       <ul className={twMerge('text-center pt-4 ', className)}>
         <span className="text-wrap">

@@ -2,6 +2,8 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
 // import icon from '../../resources/icon.png?asset'
+import { getNotes } from '@/lib'
+import { GetNotes } from '@shared/types'
 import iconmac from '../../icons/notemark.icns?asset'
 import iconwin from '../../icons/notemark.ico?asset'
 import iconlinux from '../../icons/notemark.png?asset'
@@ -91,6 +93,10 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // ------------------------------------------------------
+
+  ipcMain.handle('getNotes', (_, ...args: Parameters<GetNotes>) => getNotes(...args))
 
   createWindow()
 
