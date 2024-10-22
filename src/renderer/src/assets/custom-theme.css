@@ -6,6 +6,11 @@
   src: url('./fonts/Ovo-Regular.ttf');
 }
 
+@font-face {
+  font-family: 'satoshi-var';
+  src: url('./fonts/Satoshi-Variable.ttf');
+}
+
 .dark-editor {
   --accentBase: var(--tomato-1);
   --accentBgSubtle: var(--tomato-2);
@@ -60,10 +65,10 @@
     'Open Sans',
     'Helvetica Neue',
     sans-serif; */
-  font-family: 'ovo';
+  font-family: 'satoshi-var';
 
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-    'Courier New', monospace;
+  'Courier New', monospace;
 
   color: var(--baseText);
   /* --basePageBg: black;
@@ -84,10 +89,10 @@
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-  background: #733EDC;
+  background: #733edc;
 }
 
-.mdxeditor-toolbar{
+.mdxeditor-toolbar {
   @apply hidden;
-  @apply sm:block
+  @apply sm:block;
 }

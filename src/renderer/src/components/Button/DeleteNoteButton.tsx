@@ -6,23 +6,23 @@ import DialogBox from '../DialogBox'
 
 export const DeleteNoteButton = ({ ...props }: ActionButtonProps) => {
   const deleteNote = useSetAtom(deleteNoteAtom)
-  const [isDialogOpen, setDialogOpen] = useAtom(dialogOpenAtom)
+  // const [isDialogOpen, setDialogOpen] = useAtom(dialogOpenAtom)
 
-  const handleDelete = () => {
-    deleteNote()
-    setDialogOpen(false)
+  const handleDelete = async () => {
+    await deleteNote()
+    // setDialogOpen(false)
   }
 
   return (
     <>
-      <ActionButton onClick={() => setDialogOpen(true)} {...props}>
+      <ActionButton onClick={() => handleDelete()} {...props}>
         <FaRegTrashCan className="w-4 h-4 text-[#f2f2f2]" />
       </ActionButton>
-      <DialogBox
+      {/* <DialogBox
         title="Confirm Deletion" // Title for the dialog
         message="Are you sure you want to delete this note?" // Custom message
         onConfirm={handleDelete} // Function to call on confirm
-      />
+      /> */}
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { NoteInfo } from '@shared/models'
+import { NoteContent, NoteInfo } from '@shared/models'
 import { atom } from 'jotai'
 import { unwrap } from 'jotai/utils'
 
@@ -9,16 +9,16 @@ const loadNotes = async () => {
   return notes.sort((a, b) => b.lastEditTime - a.lastEditTime)
 }
 
-const notesAtomSync = atom<NoteInfo[] | Promise<NoteInfo[]>>(loadNotes())
+const notesAtomAsync = atom<NoteInfo[] | Promise<NoteInfo[]>>(loadNotes())
 
 // have our 'atoms' to store application state
 
 // export const notesAtom = atom<NoteInfo[]>()
-export const notesAtom = unwrap(notesAtomSync, (prev) => prev)
+export const notesAtom = unwrap(notesAtomAsync, (prev) => prev)
 
 export const selectedNoteIndexAtom = atom<number | null>(null)
 
-export const selectedNoteAtom = atom((get) => {
+const selectedNoteAtomAsync = atom(async (get) => {
   const notes = get(notesAtom)
   const selectedNoteIndex = get(selectedNoteIndexAtom)
 
@@ -26,18 +26,53 @@ export const selectedNoteAtom = atom((get) => {
 
   const selectedNote = notes[selectedNoteIndex]
 
+  const noteContent = await window.context.readNote(selectedNote.title)
+
   return {
     ...selectedNote,
-    content: `Hello from Note${selectedNoteIndex}`
+    content: noteContent
   }
 })
 
-export const createEmptyNoteAtom = atom(null, (get, set) => {
+export const selectedNoteAtom = unwrap(
+  selectedNoteAtomAsync,
+  (prev) => prev ?? { title: '', content: '', lastEditTime: Date.now() }
+)
+
+export const saveNoteAtom = atom(null, async (get, set, newContent: NoteContent) => {
+  const notes = get(notesAtom)
+  const selectedNote = get(selectedNoteAtom)
+
+  if (!selectedNote || !notes) return
+
+  // save on disk
+  await window.context.writeNote(selectedNote.title, newContent)
+
+  // update the note's lastEditTime
+  set(
+    notesAtom,
+    notes.map((note) => {
+      // this is the note
+      if (note.title === selectedNote.title) {
+        return {
+          ...note,
+          lastEditTime: Date.now()
+        }
+      }
+      return note
+    })
+  )
+})
+
+export const createEmptyNoteAtom = atom(null, async (get, set) => {
   const notes = get(notesAtom)
 
   if (!notes) return
 
-  const title = `Note ${notes.length + 1}`
+  // const title = `Note ${notes.length + 1}`
+  const title = await window.context.createNote()
+
+  if (!title) return
 
   const newNote: NoteInfo = {
     title,
@@ -49,11 +84,17 @@ export const createEmptyNoteAtom = atom(null, (get, set) => {
   set(selectedNoteIndexAtom, 0)
 })
 
-export const deleteNoteAtom = atom(null, (get, set) => {
+export const deleteNoteAtom = atom(null, async (get, set) => {
   const notes = get(notesAtom)
   const selectedNote = get(selectedNoteAtom)
 
   if (!selectedNote || !notes) return
+
+  const isDeleted = await window.context.deleteNote(selectedNote.title)
+
+  if (!isDeleted) return
+  // returns undefined = falsy
+  // stops function
 
   set(
     notesAtom,
